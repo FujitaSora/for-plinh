@@ -1,0 +1,10 @@
+{
+  "name": "for-plinh",
+  "compatibility_date": "2026-05-15",
+  "d1_databases": [{
+    "binding": "DB",
+    "database_name": "for-plinh-db",
+    "database_id": "2ba7b0c9-8df8-429a-ba16-552bb9843217",
+    "migrations_dir": "drizzle"
+  }]
+}

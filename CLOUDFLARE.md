@@ -1,0 +1,13 @@
+# Triển khai trực tiếp trên Cloudflare
+- Database: for-plinh-db (đã khai báo trong wrangler.database.json).
+- Build command: node scripts/build-cloudflare.mjs
+- Deploy command: node scripts/deploy-cloudflare.mjs
+- Branch: main
+- Không dùng bản preview để sửa dữ liệu thật.
+- Deploy script áp dụng migration trước rồi triển khai Worker bằng cấu hình đầu ra của Vite.
+- Sau khi deploy, vào Worker > Settings > Variables and Secrets, tạo Secret tên ADMIN_PASSWORD, giá trị là mật khẩu riêng ít nhất 16 ký tự (tối đa 256). Lưu/Deploy thay đổi.
+- Không thêm mật khẩu vào mã nguồn, GitHub hoặc build variables.
+- Bấm Quản trị trên trang để đăng nhập. Phiên quản trị có thời hạn 8 giờ. Mọi người đọc chung; chỉ quản trị sửa được.
+- Dữ liệu local cũ vẫn nằm trên máy trong .wrangler/state; chưa sao chép lên D1 trực tuyến.
+- Kiểm tra đăng nhập, thêm ghi chú và tải lại bằng cửa sổ ẩn danh sau khi triển khai.
+- tsc đã đạt; build sản xuất trên Windows bị EPERM, cần kiểm tra log build Cloudflare.

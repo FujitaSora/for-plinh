@@ -1,4 +1,4 @@
-import {getChatGPTUser} from '../../chatgpt-auth';
+import {isAdmin,sameOrigin} from '../../../lib/admin-auth';
 import {getDb} from '../../../db';
 import {notes} from '../../../db/schema';
 import {and,eq,desc} from 'drizzle-orm';
@@ -6,10 +6,11 @@ export const dynamic='force-dynamic';
 const categories=['Ăn uống','Quà tặng','Hẹn hò','Thói quen','Điều khác'];
 async function handle(req:Request){
  try{
- const user=await getChatGPTUser();if(!user)return Response.json({error:'Bạn hãy đăng nhập để mở sổ ghi chú.'},{status:401});
+ const user={userId:'shared-notebook'};
  const db=getDb();const owner=eq(notes.owner,user.userId);
  if(req.method==='GET')return Response.json(await db.select().from(notes).where(owner).orderBy(desc(notes.pinned),desc(notes.created)),{headers:{'Cache-Control':'no-store'}});
- if(req.headers.get('origin')&&req.headers.get('origin')!==new URL(req.url).origin)return Response.json({error:'Yêu cầu không hợp lệ.'},{status:403});
+ if(!await isAdmin(req))return Response.json({error:'Bạn hãy đăng nhập quản trị để sửa ghi chú.'},{status:401});
+ if(!sameOrigin(req))return Response.json({error:'Yêu cầu không hợp lệ.'},{status:403});
  const raw=await req.json(); if(!raw||typeof raw!=="object")return Response.json({error:"Dữ liệu không hợp lệ"},{status:400}); const x=raw as Record<string,unknown>;
  if(req.method==='DELETE'){if(typeof x.id!=='string')return Response.json({error:'Thiếu ghi chú.'},{status:400});await db.delete(notes).where(and(owner,eq(notes.id,x.id)));return Response.json({ok:true})}
  if(typeof x.title!=='string'||!x.title.trim()||x.title.length>120||typeof x.body!=='string'||x.body.length>4000||(typeof x.category!=="string"||!categories.includes(x.category))||typeof x.pinned!=='boolean')return Response.json({error:'Hãy nhập tiêu đề và chọn nhóm hợp lệ.'},{status:400});
@@ -19,4 +20,5 @@ async function handle(req:Request){
  }catch{return Response.json({error:'Chưa lưu được. Bạn thử lại nhé; nội dung đang viết vẫn còn.'},{status:500})}
 }
 export const GET=handle;export const POST=handle;export const PUT=handle;export const DELETE=handle;
+
 
